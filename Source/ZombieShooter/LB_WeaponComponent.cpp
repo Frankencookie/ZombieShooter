@@ -37,7 +37,7 @@ void ULB_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
-void ULB_WeaponComponent::ShootRaycast()
+void ULB_WeaponComponent::ShootRaycast(float spread)
 {
 	if (owner == nullptr)
 	{

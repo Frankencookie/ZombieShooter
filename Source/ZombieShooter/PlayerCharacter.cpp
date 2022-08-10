@@ -14,6 +14,14 @@ APlayerCharacter::APlayerCharacter()
 	CameraSocket->SetupAttachment(RootComponent);
 	PlayerCamera->SetupAttachment(CameraSocket);
 	CameraSocket->SetRelativeLocation(FVector(0, 0, 50.0f));
+
+	WeaponSocket = CreateDefaultSubobject<USceneComponent>(TEXT("Weapon Socket"));
+	WeaponSocket->SetupAttachment(PlayerCamera);
+
+	WeaponComponent = CreateDefaultSubobject<ULB_WeaponComponent>(TEXT("Weapon Component"));
+	WeaponViewmodel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Viewmodel Mesh"));
+	WeaponViewmodel->SetupAttachment(WeaponSocket);
+
 }
 
 void APlayerCharacter::BeginPlay()
@@ -90,10 +98,101 @@ void APlayerCharacter::Interact()
 	}
 }
 
+void APlayerCharacter::Attack()
+{
+	WeaponComponent->UseWeapon();
+}
+
+void APlayerCharacter::StopAttack()
+{
+	WeaponComponent->StopUsingWeapon();
+}
+
+void APlayerCharacter::AnimateViewmodel(float DeltaTime)
+{
+	//float WalkDropValue = -GetVelocity().GetAbs().Size() / 40;
+	float WalkDropValue = -GetVelocity().GetClampedToMaxSize(10).Size() / 2;
+
+	//Throw an error if Curve has not been set
+	if (IdleSwayCurve == NULL)
+	{
+		GLog->Log(ELogVerbosity::Error, "NO CURVE DATA");
+		return;
+	}
+
+	float CurveFinalTime;
+	float CurveStartTime;
+	IdleSwayCurve->GetTimeRange(CurveStartTime, CurveFinalTime);
+
+	AnimTime += (DeltaTime + DeltaTime * -WalkDropValue / 2);
+
+	if (AnimTime > CurveFinalTime)
+	{
+		AnimTime = CurveStartTime;
+	}
+
+	FVector SwayValue = IdleSwayCurve->GetVectorValue(AnimTime);
+	SwayValue.Z *= (1 + (-WalkDropValue / 10));
+
+	FVector WeaponOffsetTarget = WeaponComponent->CurrentWeaponData->WeaponOffset;
+
+	//Jumping
+	if (!GetCharacterMovement()->IsMovingOnGround())
+	{
+		WeaponOffsetTarget.Z += -JumpWeaponOffset;
+		SwayValue.Z = 0;
+		SwayValue.Y = 0;
+	}
+
+	//Add Side Input
+	WeaponOffsetTarget.Y += GetInputAxisValue("Right") * HorizontalOffsetMultiplier;
+
+	WeaponOffsetFinal = WeaponComponent->CurrentWeaponData->WeaponOffset;
+	WeaponOffsetBlend = FMath::VInterpTo(WeaponOffsetBlend, WeaponOffsetTarget, DeltaTime, OffsetSpeed);
+
+	//Offset Value Addition
+	WeaponOffsetFinal = WeaponOffsetBlend;
+	WeaponOffsetFinal += SwayValue * (SwayBase + -WalkDropValue / SwayMultiplier);
+
+	/*
+	//Blend X axis recoil
+	RecoilXTarget = FMath::VInterpTo(RecoilXTarget, FVector(0, 0, 0), DeltaTime, CurrentWeaponInfo->RecoilSpeed);
+	//Recoil Z Blend
+	RecoilZTarget = FMath::VInterpTo(RecoilZTarget, FVector(0, 0, 0), DeltaTime, CurrentWeaponInfo->RecoilSpeed / 4);
+	RecoilZBlend = FMath::VInterpTo(RecoilZBlend, RecoilZTarget, DeltaTime, CurrentWeaponInfo->RecoilSpeed / 2);
+
+	//Add to OffsetValue
+	WeaponOffsetFinal += RecoilXTarget;
+	WeaponOffsetFinal += RecoilZBlend;
+
+	*/
+
+	//Set Position
+	WeaponSocket->SetRelativeLocation(WeaponOffsetFinal);
+	//SkeletalViewModel->SetRelativeLocation(WeaponOffsetFinal);
+
+	//Rotation
+	FRotator RotationOffsetTarget = FRotator(0, 0, 0);
+	RotationOffsetTarget.Pitch = -GetInputAxisValue("LookUp") * RotMultiplier;
+	RotationOffsetTarget.Yaw = GetInputAxisValue("LookRight") * RotMultiplier;
+	RotationOffset = FMath::RInterpTo(RotationOffset, RotationOffsetTarget, DeltaTime, RotInterpSpeed);
+
+	//Recoil Rotation
+	//RecoilRotationTarget = FMath::RInterpTo(RecoilRotationTarget, FRotator(0, 0, 0), DeltaTime, WeaponComponent->CurrentWeaponData->RecoilSpeed);
+	//FRotator RecoilRotBlend = FRotator(0, 0, 0);
+	//RecoilRotBlend = FMath::RInterpTo(RecoilRotBlend, RecoilRotationTarget, DeltaTime, CurrentWeaponInfo->RecoilSpeed);
+
+	//RotationOffset += RecoilRotBlend;
+
+	//Set Rotation
+	WeaponSocket->SetRelativeRotation(RotationOffset);
+}
+
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	TiltCamera(DeltaTime);
+	AnimateViewmodel(DeltaTime);
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -107,6 +206,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUp);
 
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::Interact);
+	PlayerInputComponent->BindAction("Attack", IE_Pressed, this, &APlayerCharacter::Attack);
+	PlayerInputComponent->BindAction("Attack", IE_Released, this, &APlayerCharacter::StopAttack);
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &APlayerCharacter::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &APlayerCharacter::StopSprint);

@@ -6,11 +6,12 @@
 #include "Components/ActorComponent.h"
 #include "Engine/StaticMesh.h"
 #include "LB_IShootable.h"
+#include "LB_WeaponData.h"
 #include "LB_WeaponComponent.generated.h"
 
 class APlayerCharacter;
 
-UCLASS(BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ZOMBIESHOOTER_API ULB_WeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -18,6 +19,9 @@ class ZOMBIESHOOTER_API ULB_WeaponComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	ULB_WeaponComponent();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ULB_WeaponData* CurrentWeaponData;
 
 protected:
 	// Called when the game starts
@@ -35,5 +39,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UseWeapon();
 
-	void ShootRaycast();
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void StopUsingWeapon();
+
+	void ShootRaycast(float spread = 0);
 };

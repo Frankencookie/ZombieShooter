@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "LB_Character.h"
 #include "Camera/CameraComponent.h"
+#include "Curves/CurveVector.h"
+#include "LB_WeaponComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -24,10 +27,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Camera Stuff")
 	UCameraComponent* PlayerCamera;
 
+	//WeaponComponent
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ULB_WeaponComponent* WeaponComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* WeaponViewmodel;
+
+
 protected:
 
 	virtual void BeginPlay() override;
-
 
 	UPROPERTY(EditAnywhere, Category = "Player Movement")
 	float DefaultSpeed = 300;
@@ -79,6 +89,40 @@ protected:
 
 	//Interaction
 	void Interact();
+
+	//Weapon Stuff
+	void Attack();
+	void StopAttack();
+
+#pragma region ViewmodelAnimation
+
+	UPROPERTY(EditAnywhere)
+	USceneComponent* WeaponSocket;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Viewmodel Sway")
+	UCurveVector* IdleSwayCurve;
+
+	void AnimateViewmodel(float DeltaTime);
+
+	//Smooth Position blend
+	FVector WeaponOffsetBlend = FVector(0, 0, 0);
+	FVector WeaponOffsetFinal = FVector(0, 0, 0);
+	float AnimTime = 0;
+	float OffsetSpeed = 10;
+	float SwayBase = 1;
+	float SwayMultiplier = 3;
+
+	float HorizontalOffsetMultiplier = 3;
+
+	//Smooth Rotation
+	FRotator RotationOffset = FRotator(0, 0, 0);
+	float RotInterpSpeed = 5;
+	float RotMultiplier = 3;
+
+	UPROPERTY(EditAnywhere)
+	float JumpWeaponOffset = 8;
+
+#pragma endregion
 
 	UPROPERTY(EditAnywhere, Category = "Interaction")
 	float InteractRange = 100.0f;
