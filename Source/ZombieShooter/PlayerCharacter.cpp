@@ -118,7 +118,7 @@ void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 		return;
 	}
 	//float WalkDropValue = -GetVelocity().GetAbs().Size() / 40;
-	float WalkDropValue = -GetVelocity().GetClampedToMaxSize(10).Size() / 2;
+	float WalkDropValue = -GetVelocity().GetClampedToSize(-20, 20).GetAbs().Size() / 5;
 
 	//Throw an error if Curve has not been set
 	if (IdleSwayCurve == NULL)
@@ -131,7 +131,7 @@ void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 	float CurveStartTime;
 	IdleSwayCurve->GetTimeRange(CurveStartTime, CurveFinalTime);
 
-	AnimTime += (DeltaTime + DeltaTime * -WalkDropValue / 2);
+	AnimTime += (DeltaTime + (DeltaTime * -WalkDropValue / 2));
 
 	if (AnimTime > CurveFinalTime)
 	{
@@ -173,9 +173,10 @@ void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 	WeaponOffsetFinal += RecoilZBlend;
 
 	*/
+	FVector WeaponOffsetFinalFinal = FMath::Lerp(WeaponSocket->GetRelativeLocation(), WeaponOffsetFinal, DeltaTime * 10);
 
 	//Set Position
-	WeaponSocket->SetRelativeLocation(WeaponOffsetFinal);
+	WeaponSocket->SetRelativeLocation(WeaponOffsetFinalFinal);
 	//SkeletalViewModel->SetRelativeLocation(WeaponOffsetFinal);
 
 	//Rotation
