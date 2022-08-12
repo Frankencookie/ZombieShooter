@@ -9,9 +9,11 @@
 #include "LB_WeaponData.h"
 #include "LB_WeaponComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseWeapon);
+
 class APlayerCharacter;
 
-UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ZOMBIESHOOTER_API ULB_WeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -24,8 +26,6 @@ public:
 	ULB_WeaponData* CurrentWeaponData;
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
 	APlayerCharacter* owner;
 
@@ -36,11 +36,19 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// Called when the game starts
+	virtual void BeginPlay() override;
+
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void UseWeapon();
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void StopUsingWeapon();
 
+	UFUNCTION(BlueprintCallable)
 	void ShootRaycast(float spread = 0);
+
+	//Delegate version
+	UPROPERTY(BlueprintAssignable)
+	FOnUseWeapon OnUseWeapon;
 };

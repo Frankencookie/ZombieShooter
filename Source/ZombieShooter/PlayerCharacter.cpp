@@ -18,18 +18,18 @@ APlayerCharacter::APlayerCharacter()
 	WeaponSocket = CreateDefaultSubobject<USceneComponent>(TEXT("Weapon Socket"));
 	WeaponSocket->SetupAttachment(PlayerCamera);
 
-	WeaponComponent = CreateDefaultSubobject<ULB_WeaponComponent>(TEXT("Weapon Component"));
+	//WeaponComponent = CreateDefaultSubobject<ULB_WeaponComponent>(TEXT("Weapon Component"));
+
 	WeaponViewmodel = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon Viewmodel Mesh"));
 	WeaponViewmodel->SetupAttachment(WeaponSocket);
-
 }
 
 void APlayerCharacter::BeginPlay()
 {
-	Super::BeginPlay();
-
 	MovementComponent->MaxWalkSpeed = DefaultSpeed;
 	characterInstance = this;
+
+	Super::BeginPlay();
 }
 
 void APlayerCharacter::MoveForward(float value)
@@ -85,22 +85,25 @@ void APlayerCharacter::Interact()
 	GLog->Log("Interact Pressed");
 
 	//Set up Variables
-	FHitResult hitBoi;
+	FHitResult hitResult;
 	FCollisionQueryParams CollisionParameters;
 	CollisionParameters.AddIgnoredActor(this);
 	FVector Start = PlayerCamera->GetComponentLocation();
 	FVector End = Start + (PlayerCamera->GetForwardVector() * 200);
 
-	if (GetWorld()->LineTraceSingleByChannel(hitBoi, Start, End, ECC_WorldDynamic, CollisionParameters))
+	if (GetWorld()->LineTraceSingleByChannel(hitResult, Start, End, ECC_WorldDynamic, CollisionParameters))
 	{
 		GLog->Log("Hit Something");
 		//Is it interactable?
+		bool bInteractable = hitResult.GetActor()->GetClass()->ImplementsInterface(ULB_IInteractable::StaticClass());
 	}
 }
 
 void APlayerCharacter::Attack()
 {
+	GLog->Log("Trying to fire");
 	WeaponComponent->UseWeapon();
+	//WeaponComponent->OnUseWeapon.Broadcast();
 }
 
 void APlayerCharacter::StopAttack()
@@ -110,6 +113,10 @@ void APlayerCharacter::StopAttack()
 
 void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 {
+	if (WeaponComponent == nullptr)
+	{
+		return;
+	}
 	//float WalkDropValue = -GetVelocity().GetAbs().Size() / 40;
 	float WalkDropValue = -GetVelocity().GetClampedToMaxSize(10).Size() / 2;
 

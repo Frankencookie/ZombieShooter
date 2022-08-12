@@ -8,6 +8,7 @@
 #include "Curves/CurveVector.h"
 #include "LB_WeaponComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "LB_IInteractable.h"
 #include "PlayerCharacter.generated.h"
 
 /**
@@ -91,6 +92,7 @@ protected:
 	void Interact();
 
 	//Weapon Stuff
+	UFUNCTION(BlueprintCallable)
 	void Attack();
 	void StopAttack();
 

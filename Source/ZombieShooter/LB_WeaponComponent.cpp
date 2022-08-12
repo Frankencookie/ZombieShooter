@@ -26,6 +26,7 @@ void ULB_WeaponComponent::BeginPlay()
 	{
 		GLog->Log("Player Not Found");
 	}
+	GLog->Log("Begin play called in code");
 }
 
 
@@ -45,6 +46,7 @@ void ULB_WeaponComponent::ShootRaycast(float spread)
 	}
 	FHitResult hitResult;
 	FCollisionQueryParams CollisionParameters;
+	CollisionParameters.AddIgnoredActor(owner);
 	FVector startPos = owner->PlayerCamera->GetComponentLocation();
 	FVector endPos = owner->PlayerCamera->GetForwardVector() * range;
 	endPos = endPos + startPos;
@@ -52,6 +54,12 @@ void ULB_WeaponComponent::ShootRaycast(float spread)
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, startPos, endPos, ECC_WorldDynamic, CollisionParameters))
 	{
 		GLog->Log("Hit Something");
+		//Is it valid?
+		bool bValid = (hitResult.GetActor() != nullptr);
+		if (!bValid)
+		{
+			return;
+		}
 		//Is it shootable?
 		bool bInteractable = hitResult.Actor->GetClass()->ImplementsInterface(ULB_IShootable::StaticClass());
 
