@@ -90,6 +90,12 @@ protected:
 
 	//Interaction
 	void Interact();
+	void CheckInteraction();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, BlueprintCosmetic)
+	void CanInteract();
+
+	AActor* SelectedInteractable = nullptr;
 
 	//Weapon Stuff
 	UFUNCTION(BlueprintCallable)

@@ -24,4 +24,8 @@ class ZOMBIESHOOTER_API ILB_IInteractable
 public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Interactable")
 	void Interacted();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable, Category = "Interactable")
+	bool GetCanInteract();
+
 };

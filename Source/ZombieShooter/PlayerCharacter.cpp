@@ -84,6 +84,18 @@ void APlayerCharacter::Interact()
 {
 	GLog->Log("Interact Pressed");
 
+	if (SelectedInteractable != nullptr)
+	{
+		ILB_IInteractable::Execute_Interacted(SelectedInteractable);
+	}
+	else
+	{
+		GLog->Log("No Interactable");
+	}
+}
+
+void APlayerCharacter::CheckInteraction()
+{
 	//Set up Variables
 	FHitResult hitResult;
 	FCollisionQueryParams CollisionParameters;
@@ -93,9 +105,27 @@ void APlayerCharacter::Interact()
 
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, Start, End, ECC_WorldDynamic, CollisionParameters))
 	{
-		GLog->Log("Hit Something");
-		//Is it interactable?
+		//Is it valid?
+		bool bValid = (hitResult.GetActor() != nullptr);
+		if (!bValid)
+		{
+			return;
+		}
+		//Interactable?
 		bool bInteractable = hitResult.GetActor()->GetClass()->ImplementsInterface(ULB_IInteractable::StaticClass());
+		if (bInteractable)
+		{
+			CanInteract();
+			SelectedInteractable = hitResult.GetActor();
+		}
+		else
+		{
+			SelectedInteractable = nullptr;
+		}
+	}
+	else
+	{
+		SelectedInteractable = nullptr;
 	}
 }
 
@@ -201,6 +231,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	TiltCamera(DeltaTime);
 	AnimateViewmodel(DeltaTime);
+	CheckInteraction();
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
