@@ -2,6 +2,7 @@
 
 
 #include "LB_WeaponComponent.h"
+#include "WeaponBehaviour.h"
 #include "PlayerCharacter.h"
 
 // Sets default values for this component's properties
@@ -27,6 +28,24 @@ void ULB_WeaponComponent::BeginPlay()
 		GLog->Log("Player Not Found");
 	}
 	GLog->Log("Begin play called in code");
+
+	
+}
+
+void ULB_WeaponComponent::UseWeapon()
+{
+	if (currentWeapon != nullptr)
+	{
+		currentWeapon->Attack();
+	}
+}
+
+void ULB_WeaponComponent::StopUsingWeapon()
+{
+	if (currentWeapon != nullptr)
+	{
+		currentWeapon->StopAttack();
+	}
 }
 
 

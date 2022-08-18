@@ -86,7 +86,7 @@ void APlayerCharacter::Interact()
 
 	if (SelectedInteractable != nullptr)
 	{
-		ILB_IInteractable::Execute_Interacted(SelectedInteractable);
+		ILB_IInteractable::Execute_Interacted(SelectedInteractable, this);
 	}
 	else
 	{
@@ -102,7 +102,7 @@ void APlayerCharacter::CheckInteraction()
 	CollisionParameters.AddIgnoredActor(this);
 	FVector Start = PlayerCamera->GetComponentLocation();
 	FVector End = Start + (PlayerCamera->GetForwardVector() * 200);
-
+	
 	if (GetWorld()->LineTraceSingleByChannel(hitResult, Start, End, ECC_WorldDynamic, CollisionParameters))
 	{
 		//Is it valid?
@@ -115,8 +115,15 @@ void APlayerCharacter::CheckInteraction()
 		bool bInteractable = hitResult.GetActor()->GetClass()->ImplementsInterface(ULB_IInteractable::StaticClass());
 		if (bInteractable)
 		{
-			CanInteract();
 			SelectedInteractable = hitResult.GetActor();
+			if (ILB_IInteractable::Execute_GetCanInteract(SelectedInteractable))
+			{
+				CanInteract();
+			}
+			else
+			{
+				SelectedInteractable = nullptr;
+			}
 		}
 		else
 		{
@@ -145,6 +152,7 @@ void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 {
 	if (WeaponComponent == nullptr)
 	{
+		GLog->Log(ELogVerbosity::Error, "No Component");
 		return;
 	}
 	//float WalkDropValue = -GetVelocity().GetAbs().Size() / 40;
@@ -171,7 +179,9 @@ void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 	FVector SwayValue = IdleSwayCurve->GetVectorValue(AnimTime);
 	SwayValue.Z *= (1 + (-WalkDropValue / 10));
 
-	FVector WeaponOffsetTarget = WeaponComponent->CurrentWeaponData->WeaponOffset;
+	uint32 currentWeaponInt = WeaponComponent->CurrentWeaponInt;
+
+	FVector WeaponOffsetTarget = WeaponComponent->EquippedWeapons[currentWeaponInt]->WeaponData->WeaponOffset;
 
 	//Jumping
 	if (!GetCharacterMovement()->IsMovingOnGround())
@@ -184,7 +194,7 @@ void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 	//Add Side Input
 	WeaponOffsetTarget.Y += GetInputAxisValue("Right") * HorizontalOffsetMultiplier;
 
-	WeaponOffsetFinal = WeaponComponent->CurrentWeaponData->WeaponOffset;
+	//WeaponOffsetFinal = WeaponOffsetTarget;
 	WeaponOffsetBlend = FMath::VInterpTo(WeaponOffsetBlend, WeaponOffsetTarget, DeltaTime, OffsetSpeed);
 
 	//Offset Value Addition

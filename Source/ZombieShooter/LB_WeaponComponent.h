@@ -7,11 +7,13 @@
 #include "Engine/StaticMesh.h"
 #include "LB_IShootable.h"
 #include "LB_WeaponData.h"
+#include "WeaponBehaviour.h"
 #include "LB_WeaponComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnUseWeapon);
 
 class APlayerCharacter;
+//class UWeaponBehaviour;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ZOMBIESHOOTER_API ULB_WeaponComponent : public UActorComponent
@@ -22,8 +24,19 @@ public:
 	// Sets default values for this component's properties
 	ULB_WeaponComponent();
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//ULB_WeaponData* CurrentWeaponData;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ULB_WeaponData* CurrentWeaponData;
+	TArray<UWeaponBehaviour*> EquippedWeapons;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UWeaponBehaviour* currentWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UWeaponBehaviour> startingWeapon;
+
+	uint32 CurrentWeaponInt = 0;
 
 protected:
 
@@ -39,10 +52,11 @@ public:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+
+	UFUNCTION(BlueprintCallable)
 	void UseWeapon();
 
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	UFUNCTION(BlueprintCallable)
 	void StopUsingWeapon();
 
 	UFUNCTION(BlueprintCallable)
