@@ -20,6 +20,16 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Init(ULB_WeaponComponent* parent);
 
+	void NativeUpdateWeapon(float delta);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void UpdateWeapon(float delta);
+
+	UFUNCTION(BlueprintCallable)
+	bool CalculateCanFire(float delta);
+
+	void RateOfFireControl(float delta);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ULB_WeaponData* WeaponData;
 
@@ -27,11 +37,33 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 	ULB_WeaponComponent* parentWeaponComponent;
 
+	//Weapon Params
+	UPROPERTY(BlueprintReadOnly)
+	int CurrentMagAmmo;
+	UPROPERTY(BlueprintReadOnly)
+	int CurrentStoredAmmo;
+
+	float timeSinceLastShot = 0;
+	bool canFire = true;
+
+	bool triggerDown = false;
+	bool firedSinceTriggerDown = false;
+	bool canShootTime = false;
+
 public:
-	UFUNCTION(BlueprintNativeEvent)
+	//NATIVE STUFF
+	void NativeAttack();
+	void NativeStopAttack();
+
+
+	//BLUEPRINT STUFF
+	UFUNCTION(BlueprintImplementableEvent)
 	void Attack();
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintImplementableEvent)
 	void StopAttack();
 	void AltAttack();
 	void StopAltAttack();
+
+	//UFUNCTION(BlueprintNativeEvent)
+	//void Reload();
 };

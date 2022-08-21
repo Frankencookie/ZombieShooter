@@ -36,7 +36,7 @@ void ULB_WeaponComponent::UseWeapon()
 {
 	if (currentWeapon != nullptr)
 	{
-		currentWeapon->Attack();
+		currentWeapon->NativeAttack();
 	}
 }
 
@@ -44,7 +44,7 @@ void ULB_WeaponComponent::StopUsingWeapon()
 {
 	if (currentWeapon != nullptr)
 	{
-		currentWeapon->StopAttack();
+		currentWeapon->NativeStopAttack();
 	}
 }
 
@@ -54,6 +54,10 @@ void ULB_WeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (currentWeapon != nullptr)
+	{
+		currentWeapon->NativeUpdateWeapon(DeltaTime);
+	}
 	// ...
 }
 

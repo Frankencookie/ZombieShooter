@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "Engine/StaticMesh.h"
+#include "Sound/SoundBase.h"
 #include "LB_WeaponData.generated.h"
 
 /**
@@ -20,6 +21,9 @@ public:
 	int MagazineSize;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int MaxAmmo;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool FullAuto = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -29,8 +33,15 @@ public:
 	float InaccuracyPerShot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float DelayBetweenShots;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UStaticMesh* StaticWeaponModel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector WeaponOffset = FVector(26, 15, -5);
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* SoundEffect;
+
 };

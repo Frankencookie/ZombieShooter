@@ -169,7 +169,7 @@ void APlayerCharacter::AnimateViewmodel(float DeltaTime)
 	float CurveStartTime;
 	IdleSwayCurve->GetTimeRange(CurveStartTime, CurveFinalTime);
 
-	AnimTime += (DeltaTime + (DeltaTime * -WalkDropValue / 2));
+	AnimTime += (DeltaTime + (DeltaTime * -WalkDropValue));
 
 	if (AnimTime > CurveFinalTime)
 	{

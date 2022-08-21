@@ -104,7 +104,7 @@ protected:
 
 #pragma region ViewmodelAnimation
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* WeaponSocket;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Viewmodel Sway")
